@@ -4,7 +4,6 @@ import Header from '../components/layout/Header';
 import GroupModal from '../components/group/GroupModal';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
 import Pagination from '../components/common/Pagination';
-import StatsSummaryBar from '../components/common/StatsSummaryBar';
 import useDebounce from '../hooks/useDebounce';
 import {
   getGroups,
@@ -292,16 +291,6 @@ export default function GroupPage() {
               </button>
             </div>
           </div>
-
-          {/* Unique Stats Summary Cards */}
-          <StatsSummaryBar
-            stats={groupStats}
-            activeFilter={statusFilter}
-            onSelectFilter={(filter) => {
-              setStatusFilter(filter);
-              setCurrentPage(1);
-            }}
-          />
 
           {/* Search & Filter Toolbar */}
           <div className="bg-white px-3.5 py-2.5 rounded-xl border border-[#E8E3DA] shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">

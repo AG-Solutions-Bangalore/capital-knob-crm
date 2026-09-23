@@ -1,16 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
-import TestimonialModal from '../components/testimonial/TestimonialModal';
 import TestimonialViewModal from '../components/testimonial/TestimonialViewModal';
 import Pagination from '../components/common/Pagination';
-import StatsSummaryBar from '../components/common/StatsSummaryBar';
 import useDebounce from '../hooks/useDebounce';
 import {
   getTestimonials,
   getTestimonialById,
-  createTestimonial,
-  updateTestimonial,
   updateTestimonialStatus,
 } from '../services/testimonialApi';
 import {
@@ -44,24 +41,21 @@ function extractList(response) {
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return String(dateStr);
-  return d.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return String(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  } catch {
+    return String(dateStr);
+  }
 }
 
-const initialForm = {
-  testimonial_for: '',
-  testimonial_client_name: '',
-  testimonial_description: '',
-  testimonial_rating: '5',
-  testimonial_status: 'Active',
-};
-
 export default function TestimonialPage() {
+  const navigate = useNavigate();
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,12 +70,6 @@ export default function TestimonialPage() {
   const [perPage, setPerPage] = useState(12);
   const [from, setFrom] = useState(null);
   const [to, setTo] = useState(null);
-
-  // Modal State (Create / Edit)
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState(initialForm);
 
   // Preview Modal State
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -139,70 +127,7 @@ export default function TestimonialPage() {
     }
   };
 
-  /* ── 2. CREATE (POST /testimonial) & UPDATE (PUT /testimonial/{id}) ── */
-  const handleOpenCreateModal = () => {
-    setEditingId(null);
-    setForm(initialForm);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = async (item) => {
-    setEditingId(item.id);
-    setIsModalOpen(true);
-
-    setForm({
-      testimonial_for: item.testimonial_for || item.category || '',
-      testimonial_client_name: item.testimonial_client_name || item.client_name || item.name || '',
-      testimonial_description: item.testimonial_description || item.description || item.comment || '',
-      testimonial_rating: String(item.testimonial_rating || item.rating || '5'),
-      testimonial_status: item.testimonial_status || item.status || 'Active',
-    });
-
-    // Optionally fetch fresh detail by ID (GET /testimonial/{id})
-    try {
-      const res = await getTestimonialById(item.id);
-      const freshData = res?.data || res?.testimonial || res;
-      if (freshData) {
-        setForm({
-          testimonial_for: freshData.testimonial_for || item.testimonial_for || '',
-          testimonial_client_name: freshData.testimonial_client_name || item.testimonial_client_name || '',
-          testimonial_description: freshData.testimonial_description || item.testimonial_description || '',
-          testimonial_rating: String(freshData.testimonial_rating || item.testimonial_rating || '5'),
-          testimonial_status: freshData.testimonial_status || item.testimonial_status || 'Active',
-        });
-      }
-    } catch (err) {
-      // Use existing values
-    }
-  };
-
-  const handleFormSubmit = async (e) => {
-    e?.preventDefault();
-    setSubmitting(true);
-
-    try {
-      if (editingId) {
-        // PUT /testimonial/{id}
-        await updateTestimonial(editingId, form);
-        toast.success('Testimonial updated successfully.');
-      } else {
-        // POST /testimonial
-        await createTestimonial(form);
-        toast.success('Testimonial added successfully.');
-      }
-
-      setIsModalOpen(false);
-      setForm(initialForm);
-      fetchTestimonials(currentPage, searchQuery, statusFilter);
-    } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || 'Failed to save testimonial.';
-      toast.error(msg);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  /* ── 3. PATCH /testimonials/{id}/status ── */
+  /* ── 2. PATCH /testimonials/{id}/status ── */
   const handleToggleStatus = async (item) => {
     const id = item.id;
     const currentStatus = item.testimonial_status || item.status || 'Active';
@@ -312,7 +237,7 @@ export default function TestimonialPage() {
               </button>
 
               <button
-                onClick={handleOpenCreateModal}
+                onClick={() => navigate('/testimonial/create')}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#1A1817] hover:bg-[#2C2825] text-[#FAF8F5] text-[11px] font-medium shadow-2xs transition-all active:scale-95 cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5 text-[#C99C4B]" />
@@ -320,16 +245,6 @@ export default function TestimonialPage() {
               </button>
             </div>
           </div>
-
-          {/* Unique Stats Summary Cards */}
-          <StatsSummaryBar
-            stats={testimonialStats}
-            activeFilter={statusFilter}
-            onSelectFilter={(filter) => {
-              setStatusFilter(filter);
-              setCurrentPage(1);
-            }}
-          />
 
           {/* Search & Filter Toolbar */}
           <div className="bg-white px-3.5 py-2.5 rounded-xl border border-[#E8E3DA] shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -381,7 +296,7 @@ export default function TestimonialPage() {
           {loading ? (
             <div className="bg-white rounded-2xl border border-[#E8E3DA] p-12 text-center shadow-2xs">
               <RefreshCw className="h-7 w-7 animate-spin text-[#9E7432] mx-auto mb-3" />
-              <p className="text-xs font-medium text-[#78716C]">Loading client reviews...</p>
+              <p className="text-xs font-medium text-[#78716C]">Loading testimonials...</p>
             </div>
           ) : displayedItems.length === 0 ? (
             <div className="bg-white rounded-2xl border border-[#E8E3DA] p-14 text-center shadow-2xs">
@@ -391,15 +306,15 @@ export default function TestimonialPage() {
               <h3 className="font-display text-base font-bold text-[#1A1817]">No testimonials found</h3>
               <p className="text-xs text-[#8C8275] max-w-sm mx-auto mt-1 mb-5">
                 {searchQuery || statusFilter !== 'All'
-                  ? 'No reviews match your current filters. Try adjusting your query or status tab.'
-                  : 'You have not added any testimonials yet. Add your customer feedback to showcase social proof.'}
+                  ? 'No client reviews match your search or filter criteria.'
+                  : 'Add your first verified client review to build credibility on your landing pages.'}
               </p>
               <button
-                onClick={handleOpenCreateModal}
+                onClick={() => navigate('/testimonial/create')}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1A1817] text-[#FAF8F5] text-xs font-semibold shadow-xs hover:bg-[#2C2825] transition cursor-pointer"
               >
                 <Plus className="h-4 w-4 text-[#C99C4B]" />
-                <span>Add First Testimonial</span>
+                <span>Add First Review</span>
               </button>
             </div>
           ) : viewMode === 'grid' ? (
@@ -408,43 +323,44 @@ export default function TestimonialPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {displayedItems.map((item, index) => {
                   const id = item.id;
-                  const clientName = item.testimonial_client_name || item.client_name || item.name || 'Anonymous';
+                  const clientName = item.testimonial_client_name || item.client_name || item.name || 'Anonymous Client';
                   const category = item.testimonial_for || item.category || 'General';
                   const rating = Number(item.testimonial_rating || item.rating || 5);
                   const description = item.testimonial_description || item.description || item.comment || '';
                   const status = item.testimonial_status || item.status || 'Active';
                   const isActive = status === 'Active';
                   const date = item.created_at || item.createdDate || item.date;
+                  const rowNumber = (currentPage - 1) * perPage + index + 1;
 
                   return (
                     <div
                       key={id || index}
-                      className="group bg-white rounded-2xl border border-[#E8E3DA] p-5 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                      className="bg-white rounded-2xl border border-[#E8E3DA] p-5 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between"
                     >
-                      <div>
-                        {/* Top Card Header */}
-                        <div className="flex items-start justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1A1817] text-[#FAF8F5] text-xs font-bold shadow-2xs flex-shrink-0">
+                      <div className="space-y-3">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1A1817] text-[#FAF8F5] text-xs font-bold shadow-xs">
                               {clientName[0]?.toUpperCase() || 'C'}
                             </div>
-                            <div className="min-w-0">
-                              <h4 className="text-xs font-bold text-[#1A1817] truncate">
+                            <div>
+                              <h4 className="text-xs font-bold text-[#1A1817] leading-tight">
                                 {clientName}
                               </h4>
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#8C8275] truncate">
+                              <span className="inline-flex items-center gap-1 text-[10px] text-[#8C8275] mt-0.5">
                                 <Tag className="h-2.5 w-2.5 text-[#9E7432]" />
-                                {category}
+                                <span>{category}</span>
                               </span>
                             </div>
                           </div>
 
-                          {/* Status Badge */}
+                          {/* Quick Status Toggle */}
                           <button
                             type="button"
                             onClick={() => handleToggleStatus(item)}
                             title="Click to toggle status"
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold transition cursor-pointer ${
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold transition cursor-pointer flex-shrink-0 ${
                               isActive
                                 ? 'bg-[#EBF7EE] text-[#1E7E34] border border-[#C3E6CB]'
                                 : 'bg-[#FBEAEA] text-[#9A2D2D] border border-[#F5C6CB]'
@@ -457,20 +373,22 @@ export default function TestimonialPage() {
                           </button>
                         </div>
 
-                        {/* Star Rating */}
-                        <div className="flex items-center gap-1 mb-3">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-3.5 w-3.5 ${
-                                star <= rating
-                                ? 'fill-[#D4A038] text-[#D4A038]'
-                                : 'text-[#DDD7CD] fill-transparent'
-                              }`}
-                            />
-                          ))}
-                          <span className="font-mono text-[11px] font-bold text-[#8C8275] ml-1">
-                            {rating}.0
+                        {/* Rating Stars Banner */}
+                        <div className="flex items-center justify-between bg-[#FAF8F5] px-2.5 py-1.5 rounded-lg border border-[#E8E3DA]">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-3 w-3 ${
+                                  star <= rating
+                                    ? 'fill-[#D4A038] text-[#D4A038]'
+                                    : 'text-[#DDD7CD] fill-transparent'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="font-mono text-[11px] font-bold text-[#9E7432]">
+                            {rating}.0 / 5.0
                           </span>
                         </div>
 
@@ -484,7 +402,9 @@ export default function TestimonialPage() {
 
                       {/* Card Footer */}
                       <div className="mt-4 pt-3 border-t border-[#F0ECE3] flex items-center justify-between text-[11px] text-[#8C8275]">
-                        <span>{formatDate(date)}</span>
+                        <span className="font-mono text-[10px] font-semibold text-[#8C6527] bg-[#FBF4E8] px-2 py-0.5 rounded-md border border-[#F2E4C9]" title={`Sl.No ${rowNumber}`}>
+                          {rowNumber}
+                        </span>
 
                         <div className="flex items-center gap-1">
                           <button
@@ -497,7 +417,7 @@ export default function TestimonialPage() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleOpenEditModal(item)}
+                            onClick={() => navigate(`/testimonial/edit/${item.id}`)}
                             className="p-1.5 rounded-lg hover:bg-[#FAF8F5] text-[#5C554B] hover:text-[#9E7432] transition cursor-pointer"
                             title="Edit Testimonial"
                           >
@@ -530,35 +450,45 @@ export default function TestimonialPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-[#E8E3DA] bg-[#FAF8F5] font-semibold text-[#5C554B]">
-                      <th className="px-4 py-3 w-14">#</th>
-                      <th className="px-4 py-3">Client</th>
-                      <th className="px-4 py-3">Category / Page</th>
-                      <th className="px-4 py-3">Rating</th>
-                      <th className="px-4 py-3 max-w-xs">Review Snippet</th>
-                      <th className="px-4 py-3">Date</th>
-                      <th className="px-4 py-3">Status</th>
+                    <tr className="border-b border-[#E8E3DA] bg-[#FAF8F5] font-semibold text-[#5C554B] whitespace-nowrap">
+                      <th className="px-4 py-3 w-12">sl.no</th>
+                      <th className="px-4 py-3">for</th>
+                      <th className="px-4 py-3">client_name</th>
+                      <th className="px-4 py-3 max-w-xs">description</th>
+                      <th className="px-4 py-3">created</th>
+                      <th className="px-4 py-3">rating</th>
+                      <th className="px-4 py-3">updated</th>
+                      <th className="px-4 py-3">status</th>
                       <th className="px-4 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0ECE3]">
                     {displayedItems.map((item, index) => {
                       const id = item.id;
+                      const category = item.testimonial_for || item.category || 'home';
                       const clientName = item.testimonial_client_name || item.client_name || item.name || 'Anonymous';
-                      const category = item.testimonial_for || item.category || 'General';
-                      const rating = Number(item.testimonial_rating || item.rating || 5);
                       const description = item.testimonial_description || item.description || item.comment || '';
+                      const createdDate = item.testimonial_created_date || item.created_at || item.created_date;
+                      const updatedDate = item.testimonial_updated_date || item.updated_at || item.updated_date;
+                      const rating = Number(item.testimonial_rating || item.rating || 5);
                       const status = item.testimonial_status || item.status || 'Active';
                       const isActive = status === 'Active';
                       const rowNumber = (currentPage - 1) * perPage + index + 1;
-                      const date = item.created_at || item.createdDate || item.date;
 
                       return (
                         <tr key={id || index} className="hover:bg-[#FAF8F5] transition-colors">
+                          {/* 1. sl.no */}
                           <td className="px-4 py-3 font-mono text-xs text-[#9C9488]">{rowNumber}</td>
                           
-                          {/* Client */}
-                          <td className="px-4 py-3">
+                          {/* 2. for */}
+                          <td className="px-4 py-3 text-[#5C554B] whitespace-nowrap">
+                            <span className="px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#E2DDD5] text-[11px] font-medium">
+                              {category}
+                            </span>
+                          </td>
+
+                          {/* 3. client_name */}
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1A1817] text-[#FAF8F5] text-[11px] font-bold">
                                 {clientName[0]?.toUpperCase() || 'C'}
@@ -567,38 +497,38 @@ export default function TestimonialPage() {
                             </div>
                           </td>
 
-                          {/* Category */}
-                          <td className="px-4 py-3 text-[#5C554B]">
-                            <span className="px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#E2DDD5] text-[11px]">
-                              {category}
-                            </span>
+                          {/* 4. description */}
+                          <td className="px-4 py-3 text-[#78716C] max-w-xs truncate italic" title={description}>
+                            "{description}"
                           </td>
 
-                          {/* Star Rating */}
-                          <td className="px-4 py-3">
+                          {/* 5. created */}
+                          <td className="px-4 py-3 whitespace-nowrap text-xs text-[#78716C]">
+                            {formatDate(createdDate)}
+                          </td>
+
+                          {/* 6. rating */}
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center gap-1">
                               <Star className="h-3.5 w-3.5 fill-[#D4A038] text-[#D4A038]" />
                               <span className="font-mono font-bold text-[#1A1817]">{rating}.0</span>
                             </div>
                           </td>
 
-                          {/* Snippet */}
-                          <td className="px-4 py-3 text-[#78716C] max-w-xs truncate italic">
-                            "{description}"
+                          {/* 7. updated */}
+                          <td className="px-4 py-3 whitespace-nowrap text-xs text-[#78716C]">
+                            {formatDate(updatedDate)}
                           </td>
 
-                          {/* Date */}
-                          <td className="px-4 py-3 text-[#8C8275]">{formatDate(date)}</td>
-
-                          {/* Status Pill Toggle */}
-                          <td className="px-4 py-3">
+                          {/* 8. status */}
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               type="button"
                               onClick={() => handleToggleStatus(item)}
                               title="Click to toggle status"
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer ${
                                 isActive
-                                  ? 'bg-[#EBF7EE] text-[#1E7E34] border border-[#C3E6CB] hover:bg-[#D4EDDA]'
+                                   ? 'bg-[#EBF7EE] text-[#1E7E34] border border-[#C3E6CB] hover:bg-[#D4EDDA]'
                                   : 'bg-[#FBEAEA] text-[#9A2D2D] border border-[#F5C6CB] hover:bg-[#F8D7DA]'
                               }`}
                             >
@@ -609,8 +539,8 @@ export default function TestimonialPage() {
                             </button>
                           </td>
 
-                          {/* Actions */}
-                          <td className="px-4 py-3 text-right">
+                          {/* 9. Actions */}
+                          <td className="px-4 py-3 text-right whitespace-nowrap">
                             <div className="inline-flex items-center gap-1.5">
                               <button
                                 type="button"
@@ -623,7 +553,7 @@ export default function TestimonialPage() {
 
                               <button
                                 type="button"
-                                onClick={() => handleOpenEditModal(item)}
+                                onClick={() => navigate(`/testimonial/edit/${item.id}`)}
                                 title="Edit Review"
                                 className="p-1.5 rounded-lg border border-[#DDD7CD] bg-white hover:bg-[#EFECE6] text-[#4A443D] transition shadow-2xs cursor-pointer"
                               >
@@ -654,23 +584,12 @@ export default function TestimonialPage() {
         </main>
       </div>
 
-      {/* Add / Edit Testimonial Modal */}
-      <TestimonialModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleFormSubmit}
-        form={form}
-        setForm={setForm}
-        editingId={editingId}
-        submitting={submitting}
-      />
-
       {/* View Testimonial Modal */}
       <TestimonialViewModal
         isOpen={previewModalOpen}
         onClose={() => setPreviewModalOpen(false)}
         item={previewItem}
-        onEdit={(it) => handleOpenEditModal(it)}
+        onEdit={(it) => navigate(`/testimonial/edit/${it.id}`)}
       />
     </div>
   );

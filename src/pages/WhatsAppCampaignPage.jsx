@@ -5,7 +5,6 @@ import WhatsAppCampaignModal from '../components/campaign/WhatsAppCampaignModal'
 import WhatsAppCampaignViewModal from '../components/campaign/WhatsAppCampaignViewModal';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
 import Pagination from '../components/common/Pagination';
-import StatsSummaryBar from '../components/common/StatsSummaryBar';
 import {
   getWhatsAppCampaigns,
   getWhatsAppCampaignById,
@@ -349,16 +348,6 @@ export default function WhatsAppCampaignPage() {
               </button>
             </div>
           </div>
-
-          {/* Unique Stats Summary Cards */}
-          <StatsSummaryBar
-            stats={whatsAppStats}
-            activeFilter={statusFilter}
-            onSelectFilter={(filter) => {
-              setStatusFilter(filter);
-              setCurrentPage(1);
-            }}
-          />
 
           {/* Search & Filter Toolbar */}
           <div className="bg-white px-3.5 py-2.5 rounded-xl border border-[#E8E3DA] shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">

@@ -441,21 +441,23 @@ export default function BlogModal({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
-                <div>
-                  <label className="block text-xs font-semibold text-[#3D372E] mb-1.5">
-                    Publication Status
-                  </label>
-                  <select
-                    name="blog_status"
-                    value={form.blog_status || 'Active'}
-                    onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition shadow-2xs cursor-pointer"
-                  >
-                    <option value="Active">Active (Published)</option>
-                    <option value="Inactive">Inactive (Draft/Hidden)</option>
-                  </select>
-                </div>
+              <div className={editingId ? 'grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1' : 'pt-1'}>
+                {editingId && (
+                  <div>
+                    <label className="block text-xs font-semibold text-[#3D372E] mb-1.5">
+                      Status
+                    </label>
+                    <select
+                      name="blog_status"
+                      value={form.blog_status || 'Active'}
+                      onChange={handleChange}
+                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition shadow-2xs cursor-pointer"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-semibold text-[#3D372E] mb-1.5">

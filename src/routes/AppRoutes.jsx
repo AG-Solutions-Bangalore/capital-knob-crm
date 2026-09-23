@@ -12,7 +12,9 @@ import EnquiryPage from '../pages/EnquiryPage';
 import NewsletterPage from '../pages/NewsletterPage';
 import GalleryPage from '../pages/GalleryPage';
 import FaqPage from '../pages/FaqPage';
+import FaqFormPage from '../pages/FaqFormPage';
 import TestimonialPage from '../pages/TestimonialPage';
+import TestimonialFormPage from '../pages/TestimonialFormPage';
 import ClientPage from '../pages/ClientPage';
 import GroupPage from '../pages/GroupPage';
 import ContactPage from '../pages/ContactPage';
@@ -20,6 +22,7 @@ import HolidayPage from '../pages/HolidayPage';
 import TemplatePage from '../pages/TemplatePage';
 import TemplateFormPage from '../pages/TemplateFormPage';
 import PipelinePage from '../pages/PipelinePage';
+import PipelineFormPage from '../pages/PipelineFormPage';
 import WhatsAppCampaignPage from '../pages/WhatsAppCampaignPage';
 import EmailCampaignPage from '../pages/EmailCampaignPage';
 import EmailCampaignFormPage from '../pages/EmailCampaignFormPage';
@@ -59,6 +62,18 @@ export default function AppRoutes() {
         <Route
           path="/pipeline"
           element={hasWhatsApp ? <PipelinePage /> : <Navigate to="/dashboard" replace />}
+        />
+        <Route
+          path="/pipeline/create"
+          element={hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
+        />
+        <Route
+          path="/pipeline/add"
+          element={hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
+        />
+        <Route
+          path="/pipeline/edit/:id"
+          element={hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/whatsapp-campaign"
@@ -114,7 +129,13 @@ export default function AppRoutes() {
         <Route path="/blog/view/:id" element={<BlogViewPage />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/faq" element={<FaqPage />} />
+        <Route path="/faq/create" element={<FaqFormPage />} />
+        <Route path="/faq/add" element={<FaqFormPage />} />
+        <Route path="/faq/edit/:id" element={<FaqFormPage />} />
         <Route path="/testimonial" element={<TestimonialPage />} />
+        <Route path="/testimonial/create" element={<TestimonialFormPage />} />
+        <Route path="/testimonial/add" element={<TestimonialFormPage />} />
+        <Route path="/testimonial/edit/:id" element={<TestimonialFormPage />} />
         <Route path="/client" element={<ClientPage />} />
         <Route path="/enquiry" element={<EnquiryPage />} />
         <Route path="/profile" element={<ProfilePage />} />

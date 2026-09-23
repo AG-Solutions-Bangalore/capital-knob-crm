@@ -3,7 +3,6 @@ import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
 import Pagination from '../components/common/Pagination';
-import StatsSummaryBar from '../components/common/StatsSummaryBar';
 import useDebounce from '../hooks/useDebounce';
 import { getNewsletters, deleteNewsletter } from '../services/newsletterApi';
 import { 
@@ -28,19 +27,6 @@ function extractList(response) {
   if (Array.isArray(response?.newsletter)) return response.newsletter;
   if (Array.isArray(response?.subscribers)) return response.subscribers;
   return [];
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return String(dateStr);
-  return d.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 export default function NewsletterPage() {
@@ -199,11 +185,6 @@ export default function NewsletterPage() {
             </div>
           </div>
 
-          {/* Unique Stats Summary Cards */}
-          <StatsSummaryBar
-            stats={newsletterStats}
-          />
-
           {/* Search Toolbar */}
           <div className="bg-white px-3.5 py-2.5 rounded-xl border border-[#E8E3DA] shadow-2xs mb-4 flex items-center justify-between">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full max-w-sm">
@@ -243,7 +224,6 @@ export default function NewsletterPage() {
                       <tr>
                         <th className="px-4 py-2.5 w-14">#</th>
                         <th className="px-4 py-2.5">Subscriber Email</th>
-                        <th className="px-4 py-2.5">Subscribed Date</th>
                         <th className="px-4 py-2.5 text-right">Actions</th>
                       </tr>
                     </thead>
@@ -251,7 +231,6 @@ export default function NewsletterPage() {
                       {items.map((item, index) => {
                         const id = item.id;
                         const email = item.email || item.newsletter_email || item.newsletterEmail || 'N/A';
-                        const date = item.created_at || item.createdDate || item.subscription_date || item.date;
                         const rowNumber = (currentPage - 1) * perPage + index + 1;
 
                         return (
@@ -265,10 +244,6 @@ export default function NewsletterPage() {
                                 </div>
                                 <span className="font-medium text-xs text-[#1A1817] tracking-tight">{email}</span>
                               </div>
-                            </td>
-
-                            <td className="px-4 py-3 text-xs text-[#78716C] whitespace-nowrap">
-                              {formatDate(date)}
                             </td>
 
                             {/* Actions */}

@@ -4,7 +4,6 @@ import Header from '../components/layout/Header';
 import HolidayModal from '../components/holiday/HolidayModal';
 import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
 import Pagination from '../components/common/Pagination';
-import StatsSummaryBar from '../components/common/StatsSummaryBar';
 import useDebounce from '../hooks/useDebounce';
 import {
   getHolidays,
@@ -47,27 +46,14 @@ function parseHolidayDate(dateStr) {
 function formatHolidayDate(dateStr) {
   const d = parseHolidayDate(dateStr);
   if (!d) return String(dateStr || '—');
-  return d.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-function formatDDMMYYYY(dateStr) {
-  if (!dateStr) return '—';
-  const cleanStr = String(dateStr).split('T')[0].trim();
-  const parts = cleanStr.split('-');
-  if (parts.length === 3 && parts[0].length === 4) {
-    const [year, month, day] = parts;
-    return `${day}-${month}-${year}`;
-  }
-  const d = parseHolidayDate(dateStr);
-  if (!d) return String(dateStr);
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
   return `${day}-${month}-${year}`;
+}
+
+function formatDDMMYYYY(dateStr) {
+  return formatHolidayDate(dateStr);
 }
 
 function getDayOfWeek(dateStr) {
@@ -353,16 +339,6 @@ export default function HolidayPage() {
               </button>
             </div>
           </div>
-
-          {/* Unique Stats Summary Cards */}
-          <StatsSummaryBar
-            stats={holidayStats}
-            activeFilter={filterPeriod}
-            onSelectFilter={(filter) => {
-              setFilterPeriod(filter);
-              setCurrentPage(1);
-            }}
-          />
 
           {/* Search & Filter Toolbar */}
           <div className="bg-white px-3.5 py-2.5 rounded-xl border border-[#E8E3DA] shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
