@@ -4,13 +4,16 @@ import { useAuthContext } from '../../context/AuthContext';
 
 function formatDate(dateStr) {
   if (!dateStr) return 'N/A';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return String(dateStr);
-  return d.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return String(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  } catch {
+    return String(dateStr);
+  }
 }
 
 function getStatusBadge(status) {
@@ -84,45 +87,33 @@ export default function EnquiryDetailsModal({ isOpen, onClose, enquiry, loading 
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA]">
                   <span className="text-xs uppercase font-semibold text-[#8C8275] block mb-1">Customer Name</span>
                   <span className="font-semibold text-[#1A1817] text-sm">{name}</span>
                 </div>
 
-                {hasWhatsApp ? (
+                {hasWhatsApp && (
                   <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA]">
                     <span className="text-xs uppercase font-semibold text-[#8C8275] block mb-1">Mobile</span>
                     <span className="font-semibold text-[#1A1817] text-sm">{mobile}</span>
                   </div>
-                ) : (
+                )}
+
+                {hasEmail && email && (
+                  <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA]">
+                    <span className="text-xs uppercase font-semibold text-[#8C8275] block mb-1">Email</span>
+                    <span className="font-semibold text-[#1A1817] text-sm break-all">{email}</span>
+                  </div>
+                )}
+
+                {occasion && occasion !== '—' && occasion !== 'N/A' && (
                   <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA]">
                     <span className="text-xs uppercase font-semibold text-[#8C8275] block mb-1">Occasion / Event</span>
                     <span className="font-semibold text-[#1A1817] text-sm">{occasion}</span>
                   </div>
                 )}
               </div>
-
-              {hasWhatsApp ? (
-                <div className="grid grid-cols-2 gap-3.5">
-                  {hasEmail && (
-                    <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA]">
-                      <span className="text-xs uppercase font-semibold text-[#8C8275] block mb-1">Email</span>
-                      <span className="font-semibold text-[#1A1817] text-sm break-all">{email}</span>
-                    </div>
-                  )}
-
-                  <div className={`p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA] ${!hasEmail ? 'col-span-2' : ''}`}>
-                    <span className="text-xs uppercase font-semibold text-[#8C8275] block mb-1">Occasion / Event</span>
-                    <span className="font-semibold text-[#1A1817] text-sm">{occasion}</span>
-                  </div>
-                </div>
-              ) : hasEmail ? (
-                <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA]">
-                  <span className="text-xs uppercase font-semibold text-[#8C8275] block mb-1">Email</span>
-                  <span className="font-semibold text-[#1A1817] text-sm break-all">{email}</span>
-                </div>
-              ) : null}
 
               {weddingDate && (
                 <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#E8E3DA]">
