@@ -3,6 +3,7 @@ import { X, HelpCircle, Plus, Trash2, Save, AlertCircle, GripVertical, ChevronDo
 import toast from 'react-hot-toast';
 import { deleteFaqSub } from '../../services/faqApi';
 import { getPageTwoList } from '../../services/pageTwoApi';
+import { useAuthContext } from '../../context/AuthContext';
 
 const emptySubItem = (index = 1, faq_for = '') => ({
   faq_sort: String(index),
@@ -22,6 +23,7 @@ export default function FaqModal({
   editingId,
   submitting,
 }) {
+  const { isAdmin } = useAuthContext();
   const [deletingSubId, setDeletingSubId] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [pages, setPages] = useState([]);
@@ -350,25 +352,27 @@ export default function FaqModal({
                           </select>
                         )}
 
-                        {form.subs?.length > 1 ? (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSub(index)}
-                            disabled={deletingSubId === sub.id}
-                            title="Remove Question"
-                            className="p-1 rounded-md text-[#8C8275] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] transition cursor-pointer"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled
-                            title="At least 1 question is required"
-                            className="p-1 rounded-md text-[#CDC6BA] cursor-not-allowed opacity-40"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                        {isAdmin && (
+                          form.subs?.length > 1 ? (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSub(index)}
+                              disabled={deletingSubId === sub.id}
+                              title="Remove Question"
+                              className="p-1 rounded-md text-[#8C8275] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] transition cursor-pointer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled
+                              title="At least 1 question is required"
+                              className="p-1 rounded-md text-[#CDC6BA] cursor-not-allowed opacity-40"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )
                         )}
                       </div>
                     </div>
@@ -376,13 +380,13 @@ export default function FaqModal({
                     {/* Optional Section Heading */}
                     <div>
                       <label className="block text-[11px] font-medium text-[#78716C] mb-1">
-                        Optional Subsection Heading (faq_heading)
+                        Optional Subsection Heading
                       </label>
                       <input
                         type="text"
                         value={sub.faq_heading || ''}
                         onChange={(e) => handleSubChange(index, 'faq_heading', e.target.value)}
-                        placeholder="Enter subsection heading (optional)"
+                        placeholder="Enter subsection heading"
                         className="w-full px-3 py-1.5 text-xs rounded-lg border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] transition"
                       />
                     </div>

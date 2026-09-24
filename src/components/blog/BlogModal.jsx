@@ -402,7 +402,7 @@ export default function BlogModal({
                         <Upload className="h-5 w-5" />
                       </div>
                       <p className="text-sm font-semibold text-[#1A1817]">Upload Banner Image</p>
-                      <p className="text-xs text-[#8C8275]">Supports PNG, JPG, WEBP (Max 5MB)</p>
+                      <p className="text-xs text-[#8C8275]">Supports PNG, JPG, WEBP • Max 5MB</p>
                     </div>
                   )}
                 </div>
@@ -429,7 +429,7 @@ export default function BlogModal({
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-[#3D372E] mb-1.5">
-                  Meta Keywords (SEO)
+                  Meta Keywords
                 </label>
                 <input
                   type="text"
@@ -469,8 +469,8 @@ export default function BlogModal({
                     onChange={handleChange}
                     className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition shadow-2xs cursor-pointer"
                   >
-                    <option value="1">Index (Search visible)</option>
-                    <option value="0">No-Index (Hidden from Google)</option>
+                    <option value="1">Index</option>
+                    <option value="0">No-Index</option>
                   </select>
                 </div>
               </div>

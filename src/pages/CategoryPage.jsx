@@ -325,7 +325,7 @@ export default function CategoryPage() {
                   <table className="w-full text-left text-xs text-[#3D372E]">
                     <thead className="bg-[#F7F4EE] border-b border-[#E8E3DA] text-xs uppercase font-semibold text-[#78716C] tracking-wider">
                       <tr>
-                        <th className="px-4 py-2.5 w-14">#</th>
+                        <th className="px-4 py-2.5 w-16">Sl.No</th>
                         <th className="px-4 py-2.5">Category Name</th>
                         <th className="px-4 py-2.5">Status</th>
                         <th className="px-4 py-2.5 text-right">Actions</th>

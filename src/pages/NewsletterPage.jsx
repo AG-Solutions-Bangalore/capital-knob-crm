@@ -5,6 +5,7 @@ import DeleteConfirmModal from '../components/common/DeleteConfirmModal';
 import Pagination from '../components/common/Pagination';
 import useDebounce from '../hooks/useDebounce';
 import { getNewsletters, deleteNewsletter } from '../services/newsletterApi';
+import { useAuthContext } from '../context/AuthContext';
 import { 
   Search, 
   Trash2, 
@@ -30,6 +31,7 @@ function extractList(response) {
 }
 
 export default function NewsletterPage() {
+  const { isAdmin } = useAuthContext();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -222,7 +224,7 @@ export default function NewsletterPage() {
                   <table className="w-full text-left text-xs text-[#3D372E]">
                     <thead className="bg-[#F7F4EE] border-b border-[#E8E3DA] text-xs uppercase font-semibold text-[#78716C] tracking-wider">
                       <tr>
-                        <th className="px-4 py-2.5 w-14">#</th>
+                        <th className="px-4 py-2.5 w-16">Sl.No</th>
                         <th className="px-4 py-2.5">Subscriber Email</th>
                         <th className="px-4 py-2.5 text-right">Actions</th>
                       </tr>
@@ -257,16 +259,18 @@ export default function NewsletterPage() {
                                   {copiedId === id ? <Check className="h-3.5 w-3.5 text-[#1E6B34]" /> : <Copy className="h-3.5 w-3.5" />}
                                 </button>
 
-                                <button
-                                  onClick={() => {
-                                    setDeletingId(id);
-                                    setDeleteModalOpen(true);
-                                  }}
-                                  title="Delete Subscriber"
-                                  className="p-1.5 rounded-lg text-[#78716C] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] transition cursor-pointer"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => {
+                                      setDeletingId(id);
+                                      setDeleteModalOpen(true);
+                                    }}
+                                    title="Delete Subscriber"
+                                    className="p-1.5 rounded-lg text-[#78716C] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] transition cursor-pointer"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>

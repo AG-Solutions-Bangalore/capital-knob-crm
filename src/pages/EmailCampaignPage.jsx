@@ -266,7 +266,7 @@ export default function EmailCampaignPage() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-[#E8E3DA] bg-[#FAF8F5] font-semibold text-[#5C554B]">
-                  <th className="py-3 px-4 w-12 text-center">#</th>
+                  <th className="py-3 px-4 w-16 text-center">Sl.No</th>
                   <th className="py-3 px-4">Campaign & Subject</th>
                   <th className="py-3 px-4">Schedule Date</th>
                   <th className="py-3 px-4">Holiday Rule</th>

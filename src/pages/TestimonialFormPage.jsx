@@ -269,7 +269,7 @@ export default function TestimonialFormPage() {
                       : 'bg-[#FDF0F0] text-[#9A2D2D] border-[#F6C8C8]'
                   }`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${form.testimonial_status === 'Active' ? 'bg-[#1E6B34]' : 'bg-[#9A2D2D]'}`} />
-                    <span>{form.testimonial_status === 'Active' ? 'Published (Active)' : 'Draft (Hidden)'}</span>
+                    <span>{form.testimonial_status === 'Active' ? 'Active' : 'Inactive'}</span>
                   </span>
                 </div>
               )}
@@ -409,8 +409,8 @@ export default function TestimonialFormPage() {
                     onChange={handleInputChange}
                     className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition shadow-2xs cursor-pointer"
                   >
-                    <option value="Active">Active (Visible on website)</option>
-                    <option value="Inactive">Inactive (Hidden)</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
                   </select>
                 </div>
               )}

@@ -28,13 +28,14 @@ import EmailCampaignPage from '../pages/EmailCampaignPage';
 import EmailCampaignFormPage from '../pages/EmailCampaignFormPage';
 import EmailCampaignViewPage from '../pages/EmailCampaignViewPage';
 import CompanyPage from '../pages/CompanyPage';
+import DownloadsPage from '../pages/DownloadsPage';
 import AuthRoute from './AuthRoute';
 import ProtectedRoute from './ProtectedRoute';
 
 import { useAuthContext } from '../context/AuthContext';
 
 export default function AppRoutes() {
-  const { hasEmail, hasWhatsApp } = useAuthContext();
+  const { hasEmail, hasWhatsApp, isAdmin } = useAuthContext();
 
   return (
     <Routes>
@@ -50,72 +51,74 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/company" element={<CompanyPage />} />
         <Route path="/category" element={<CategoryPage />} />
-        <Route path="/group" element={<GroupPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/holiday" element={<HolidayPage />} />
-        <Route path="/template" element={<TemplatePage />} />
-        <Route path="/template/create" element={<TemplateFormPage />} />
-        <Route path="/template/add" element={<TemplateFormPage />} />
-        <Route path="/template/edit/:id" element={<TemplateFormPage />} />
         
-        {/* WhatsApp-only Routes */}
+        {/* Marketing Routes (Admin only: user_type === 2) */}
+        <Route path="/group" element={isAdmin ? <GroupPage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/contact" element={isAdmin ? <ContactPage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/holiday" element={isAdmin ? <HolidayPage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/template" element={isAdmin ? <TemplatePage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/template/create" element={isAdmin ? <TemplateFormPage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/template/add" element={isAdmin ? <TemplateFormPage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/template/edit/:id" element={isAdmin ? <TemplateFormPage /> : <Navigate to="/dashboard" replace />} />
+        
+        {/* WhatsApp Marketing Routes (Admin + WhatsApp enabled) */}
         <Route
           path="/pipeline"
-          element={hasWhatsApp ? <PipelinePage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasWhatsApp ? <PipelinePage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/pipeline/create"
-          element={hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/pipeline/add"
-          element={hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/pipeline/edit/:id"
-          element={hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasWhatsApp ? <PipelineFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/whatsapp-campaign"
-          element={hasWhatsApp ? <WhatsAppCampaignPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasWhatsApp ? <WhatsAppCampaignPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/whatsappcampaign"
-          element={hasWhatsApp ? <WhatsAppCampaignPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasWhatsApp ? <WhatsAppCampaignPage /> : <Navigate to="/dashboard" replace />}
         />
 
-        {/* Email-only Routes */}
+        {/* Email Marketing Routes (Admin + Email enabled) */}
         <Route
           path="/email-campaign"
-          element={hasEmail ? <EmailCampaignPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/email-campaign/create"
-          element={hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/email-campaign/add"
-          element={hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/email-campaign/view/:id"
-          element={hasEmail ? <EmailCampaignViewPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignViewPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/emailcampaign"
-          element={hasEmail ? <EmailCampaignPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/emailcampaign/create"
-          element={hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/emailcampaign/add"
-          element={hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignFormPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/emailcampaign/view/:id"
-          element={hasEmail ? <EmailCampaignViewPage /> : <Navigate to="/dashboard" replace />}
+          element={isAdmin && hasEmail ? <EmailCampaignViewPage /> : <Navigate to="/dashboard" replace />}
         />
         <Route
           path="/newsletter"
@@ -138,6 +141,9 @@ export default function AppRoutes() {
         <Route path="/testimonial/edit/:id" element={<TestimonialFormPage />} />
         <Route path="/client" element={<ClientPage />} />
         <Route path="/enquiry" element={<EnquiryPage />} />
+        <Route path="/downloads" element={<DownloadsPage />} />
+        <Route path="/download" element={<DownloadsPage />} />
+        <Route path="/reports/downloads" element={<DownloadsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
       </Route>

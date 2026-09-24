@@ -46,7 +46,7 @@ function formatDate(dateStr) {
 const STATUS_OPTIONS = ['Pending', 'Processing', 'Completed', 'Cancel'];
 
 export default function EnquiryPage() {
-  const { hasEmail, hasWhatsApp } = useAuthContext();
+  const { hasEmail, hasWhatsApp, isAdmin } = useAuthContext();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -307,12 +307,14 @@ export default function EnquiryPage() {
                   <table className="w-full text-left text-xs text-[#3D372E]">
                     <thead className="bg-[#F7F4EE] border-b border-[#E8E3DA] text-xs uppercase font-semibold text-[#78716C] tracking-wider whitespace-nowrap">
                       <tr>
-                        <th className="px-4 py-2.5 w-12">sl.no</th>
+                        <th className="px-4 py-2.5 w-14">Sl.No</th>
                         <th className="px-4 py-2.5">FullName</th>
                         <th className="px-4 py-2.5">Mobile</th>
                         <th className="px-4 py-2.5">Email</th>
                         <th className="px-4 py-2.5">Service</th>
+                        <th className="px-4 py-2.5">Enquiry From</th>
                         <th className="px-4 py-2.5">Message</th>
+                        <th className="px-4 py-2.5">UTM Tracking</th>
                         <th className="px-4 py-2.5">Status</th>
                         <th className="px-4 py-2.5 text-right">Actions</th>
                       </tr>
@@ -324,7 +326,12 @@ export default function EnquiryPage() {
                         const mobile = item.enquiryMobile || item.mobile || item.phone || '—';
                         const email = item.enquiryEmail || item.email || '—';
                         const service = item.enquiryService || item.service || item.service_name || '—';
+                        const enquiryFrom = item.enquiryFrom || item.enquiry_from || '—';
                         const message = item.enquiryMessage || item.message || item.description || '—';
+                        const utmMedium = item.utm_medium || '';
+                        const utmSource = item.utm_source || '';
+                        const utmCampaign = item.utm_campaign || '';
+                        const hasUtm = Boolean(utmSource || utmMedium || utmCampaign);
                         const currentStatus = item.enquiryStatus || item.enquiry_status || item.status || 'Pending';
                         const rowNumber = (currentPage - 1) * perPage + index + 1;
 
@@ -350,46 +357,95 @@ export default function EnquiryPage() {
 
                             {/* 5. Service */}
                             <td className="px-4 py-3 whitespace-nowrap">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#E8E3DA] text-[11px] text-[#4A443D]">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#E8E3DA] text-[11px] text-[#4A443D] font-medium">
                                 {service}
                               </span>
                             </td>
 
-                            {/* 6. Message */}
-                            <td className="px-4 py-3 text-xs text-[#78716C] max-w-[240px]">
+                            {/* 6. Enquiry From */}
+                            <td className="px-4 py-3 text-xs text-[#6B655B] max-w-[200px]">
+                              <span className="block truncate" title={enquiryFrom}>
+                                {enquiryFrom}
+                              </span>
+                            </td>
+
+                            {/* 7. Message */}
+                            <td className="px-4 py-3 text-xs text-[#78716C] max-w-[200px]">
                               <span className="block truncate" title={message}>
                                 {message}
                               </span>
                             </td>
 
-                            {/* 7. Status */}
+                            {/* 8. UTM Tracking */}
                             <td className="px-4 py-3 whitespace-nowrap">
-                              <select
-                                value={currentStatus}
-                                onChange={(e) => handleStatusChange(id, e.target.value)}
-                                className={`text-xs font-medium py-0.5 px-2.5 rounded-full border outline-none cursor-pointer transition shadow-2xs ${getStatusColor(currentStatus)}`}
-                              >
-                                {STATUS_OPTIONS.map((opt) => (
-                                  <option key={opt} value={opt} className="bg-white text-[#1A1817]">
-                                    {opt}
-                                  </option>
-                                ))}
-                              </select>
+                              {hasUtm ? (
+                                <div className="flex flex-wrap gap-1 max-w-[180px]">
+                                  {utmSource && (
+                                    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#EBF3FF] text-[#1E40AF] border border-[#BFDBFE]">
+                                      s:{utmSource}
+                                    </span>
+                                  )}
+                                  {utmMedium && (
+                                    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#F3E8FF] text-[#6B21A8] border border-[#E9D5FF]">
+                                      m:{utmMedium}
+                                    </span>
+                                  )}
+                                  {utmCampaign && (
+                                    <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">
+                                      c:{utmCampaign}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-[#A8A29E] text-[11px]">—</span>
+                              )}
                             </td>
 
-                            {/* 8. Actions (Delete only, View button removed) */}
+                            {/* 9. Status */}
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              {isAdmin ? (
+                                <select
+                                  value={currentStatus}
+                                  onChange={(e) => handleStatusChange(id, e.target.value)}
+                                  className={`text-xs font-medium py-0.5 px-2.5 rounded-full border outline-none cursor-pointer transition shadow-2xs ${getStatusColor(currentStatus)}`}
+                                >
+                                  {STATUS_OPTIONS.map((opt) => (
+                                    <option key={opt} value={opt} className="bg-white text-[#1A1817]">
+                                      {opt}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <span className={`inline-flex items-center text-xs font-medium py-0.5 px-2.5 rounded-full border shadow-2xs ${getStatusColor(currentStatus)}`}>
+                                  {currentStatus}
+                                </span>
+                              )}
+                            </td>
+
+                            {/* 10. Actions */}
                             <td className="px-4 py-3 text-right whitespace-nowrap">
                               <div className="flex items-center justify-end gap-1">
                                 <button
-                                  onClick={() => {
-                                    setDeletingId(id);
-                                    setDeleteModalOpen(true);
-                                  }}
-                                  title="Delete Enquiry"
-                                  className="p-1.5 rounded-lg text-[#78716C] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] transition cursor-pointer"
+                                  type="button"
+                                  onClick={() => handleViewDetails(id)}
+                                  title="View Enquiry Details"
+                                  className="p-1.5 rounded-lg text-[#78716C] hover:text-[#9E7432] hover:bg-[#FBF4E8] transition cursor-pointer"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <Eye className="h-3.5 w-3.5" />
                                 </button>
+                                {isAdmin && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setDeletingId(id);
+                                      setDeleteModalOpen(true);
+                                    }}
+                                    title="Delete Enquiry"
+                                    className="p-1.5 rounded-lg text-[#78716C] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] transition cursor-pointer"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>

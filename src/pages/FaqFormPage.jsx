@@ -22,6 +22,7 @@ import {
   deleteFaqSub,
 } from '../services/faqApi';
 import { getPageTwoList } from '../services/pageTwoApi';
+import { useAuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const emptySubItem = (index = 1, faq_for = '') => ({
@@ -40,6 +41,7 @@ const initialForm = {
 };
 
 export default function FaqFormPage() {
+  const { isAdmin } = useAuthContext();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = Boolean(id);
@@ -367,7 +369,7 @@ export default function FaqFormPage() {
                       : 'bg-[#FDF0F0] text-[#9A2D2D] border-[#F6C8C8]'
                     }`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${form.faq_status === 'Active' ? 'bg-[#1E6B34]' : 'bg-[#9A2D2D]'}`} />
-                    <span>{form.faq_status === 'Active' ? 'Active (Visible)' : 'Inactive (Hidden)'}</span>
+                    <span>{form.faq_status === 'Active' ? 'Active' : 'Inactive'}</span>
                   </span>
                 </div>
               )}
@@ -423,8 +425,8 @@ export default function FaqFormPage() {
                       onChange={(e) => setForm((prev) => ({ ...prev, faq_status: e.target.value }))}
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition shadow-2xs cursor-pointer"
                     >
-                      <option value="Active">Active (Visible)</option>
-                      <option value="Inactive">Inactive (Hidden)</option>
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
                     </select>
                   </div>
                 )}
@@ -437,7 +439,7 @@ export default function FaqFormPage() {
                 <div>
                   <h3 className="text-sm font-bold text-[#1A1817] flex items-center gap-2">
                     <HelpCircle className="h-4 w-4 text-[#9E7432]" />
-                    <span>Questions & Answers ({form.subs?.length || 0})</span>
+                    <span>Questions & Answers</span>
                   </h3>
                   <p className="text-xs text-[#8C8275] mt-0.5">
                     Define question and answer pairs belonging to this FAQ topic
@@ -484,25 +486,27 @@ export default function FaqFormPage() {
                           </select>
                         )}
 
-                        {form.subs?.length > 1 ? (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSub(index)}
-                            disabled={deletingSubId === sub.id}
-                            title="Delete this question"
-                            className="p-1.5 rounded-lg text-[#8C8275] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] border border-transparent hover:border-[#F6C8C8] transition cursor-pointer"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => toast.error('A FAQ topic must have at least 1 Q&A. You cannot delete the only question.')}
-                            title="At least 1 Q&A is required (cannot delete)"
-                            className="p-1.5 rounded-lg text-[#CDC6BA] hover:text-[#8C8275] border border-transparent cursor-not-allowed opacity-50"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                        {isAdmin && (
+                          form.subs?.length > 1 ? (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSub(index)}
+                              disabled={deletingSubId === sub.id}
+                              title="Delete this question"
+                              className="p-1.5 rounded-lg text-[#8C8275] hover:text-[#9A2D2D] hover:bg-[#FDF0F0] border border-transparent hover:border-[#F6C8C8] transition cursor-pointer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => toast.error('A FAQ topic must have at least 1 Q&A. You cannot delete the only question.')}
+                              title="At least 1 Q&A is required (cannot delete)"
+                              className="p-1.5 rounded-lg text-[#CDC6BA] hover:text-[#8C8275] border border-transparent cursor-not-allowed opacity-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )
                         )}
                       </div>
                     </div>
@@ -510,13 +514,13 @@ export default function FaqFormPage() {
                     {/* Subsection Heading */}
                     <div>
                       <label className="block text-[11px] font-medium text-[#78716C] mb-1">
-                        Optional Subsection Heading (<code className="font-mono text-[#8C6527]">faq_heading</code>)
+                        Optional Subsection Heading
                       </label>
                       <input
                         type="text"
                         value={sub.faq_heading || ''}
                         onChange={(e) => handleSubChange(index, 'faq_heading', e.target.value)}
-                        placeholder="e.g. Orders & Shipping (optional)"
+                        placeholder="e.g. Orders & Shipping"
                         className="w-full px-3.5 py-2 text-xs rounded-xl border border-[#E2DDD5] bg-white text-[#1A1817] focus:outline-none focus:border-[#C99C4B] transition shadow-2xs"
                       />
                     </div>

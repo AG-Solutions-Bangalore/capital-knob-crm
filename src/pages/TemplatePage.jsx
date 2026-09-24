@@ -351,7 +351,7 @@ export default function TemplatePage() {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-[#E8E3DA] bg-[#FAF8F5] font-semibold text-[#5C554B]">
-                      <th className="px-5 py-3 w-16">#</th>
+                      <th className="px-5 py-3 w-16">Sl.No</th>
                       <th className="px-5 py-3">Template Name</th>
                       <th className="px-5 py-3">Type</th>
                       <th className="px-5 py-3">Template ID</th>

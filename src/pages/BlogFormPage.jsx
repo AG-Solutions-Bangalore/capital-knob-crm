@@ -350,7 +350,7 @@ export default function BlogFormPage() {
                     : 'bg-[#FDF0F0] text-[#9A2D2D] border-[#F6C8C8]'
                 }`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${form.blog_status === 'Active' ? 'bg-[#1E6B34]' : 'bg-[#9A2D2D]'}`} />
-                  <span>{form.blog_status === 'Active' ? 'Published (Active)' : 'Draft (Inactive)'}</span>
+                  <span>{form.blog_status === 'Active' ? 'Active' : 'Inactive'}</span>
                 </span>
               </div>
             </div>
@@ -573,7 +573,7 @@ export default function BlogFormPage() {
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-[#1A1817]">Upload Article Banner</p>
-                          <p className="text-xs text-[#8C8275] mt-1">Recommended size: 1200 x 630 px (PNG, JPG, WEBP)</p>
+                          <p className="text-xs text-[#8C8275] mt-1">Recommended size: 1200 x 630 px</p>
                         </div>
                       </div>
                     )}
@@ -668,8 +668,8 @@ export default function BlogFormPage() {
                       onChange={handleChange}
                       className="w-full px-4 py-2.5 text-sm rounded-xl border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition shadow-2xs cursor-pointer"
                     >
-                      <option value="1">Index (Visible to Google & Search)</option>
-                      <option value="0">No-Index (Hide from Google)</option>
+                      <option value="1">Index</option>
+                      <option value="0">No-Index</option>
                     </select>
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import TestimonialViewModal from '../components/testimonial/TestimonialViewModal';
@@ -7,7 +7,6 @@ import Pagination from '../components/common/Pagination';
 import useDebounce from '../hooks/useDebounce';
 import {
   getTestimonials,
-  getTestimonialById,
   updateTestimonialStatus,
 } from '../services/testimonialApi';
 import {
@@ -18,14 +17,6 @@ import {
   Quote,
   Star,
   Eye,
-  CheckCircle2,
-  XCircle,
-  LayoutGrid,
-  List,
-  User,
-  Tag,
-  ThumbsUp,
-  Award,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -61,13 +52,12 @@ export default function TestimonialPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 350);
   const [statusFilter, setStatusFilter] = useState('All');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [perPage, setPerPage] = useState(12);
+  const [perPage, setPerPage] = useState(10);
   const [from, setFrom] = useState(null);
   const [to, setTo] = useState(null);
 
@@ -92,9 +82,9 @@ export default function TestimonialPage() {
       // Pagination metadata
       const paginationObj = res?.data?.data ? res?.data : res;
       const total = paginationObj?.total ?? list.length;
-      const lastPage = paginationObj?.last_page ?? Math.max(1, Math.ceil(total / (paginationObj?.per_page || 12)));
+      const lastPage = paginationObj?.last_page ?? Math.max(1, Math.ceil(total / (paginationObj?.per_page || 10)));
       const curr = paginationObj?.current_page ?? page;
-      const per = paginationObj?.per_page ?? 12;
+      const per = paginationObj?.per_page ?? 10;
 
       setTotalCount(total);
       setTotalPages(lastPage);
@@ -127,7 +117,7 @@ export default function TestimonialPage() {
     }
   };
 
-  /* ── 2. PATCH /testimonials/{id}/status ── */
+  /* ── 2. Status toggle ── */
   const handleToggleStatus = async (item) => {
     const id = item.id;
     const currentStatus = item.testimonial_status || item.status || 'Active';
@@ -151,13 +141,13 @@ export default function TestimonialPage() {
     }
   };
 
-  /* ── 4. Preview Modal ── */
+  /* ── 3. Preview Modal ── */
   const handleOpenPreview = (item) => {
     setPreviewItem(item);
     setPreviewModalOpen(true);
   };
 
-  // Filtered items based on statusFilter tab
+  // Filtered items
   const displayedItems = useMemo(() => {
     if (statusFilter === 'All') return items;
     return items.filter((it) => {
@@ -165,46 +155,6 @@ export default function TestimonialPage() {
       return st === statusFilter.toLowerCase();
     });
   }, [items, statusFilter]);
-
-  // Metrics
-  const testimonialStats = useMemo(() => {
-    const total = totalCount || items.length;
-    let active = 0;
-    let inactive = 0;
-
-    items.forEach((it) => {
-      const st = (it.testimonial_status || it.status || 'Active').toLowerCase();
-      if (st === 'active' || st === '1') active++;
-      else inactive++;
-    });
-
-    return [
-      {
-        label: 'Total Testimonials',
-        value: total,
-        icon: Quote,
-        color: 'emerald',
-        filterValue: 'All',
-        subtext: 'Submitted reviews & quotes',
-      },
-      {
-        label: 'Active Reviews',
-        value: active,
-        icon: CheckCircle2,
-        color: 'amber',
-        filterValue: 'Active',
-        subtext: 'Visible in customer showcase',
-      },
-      {
-        label: 'Inactive / Hidden',
-        value: inactive,
-        icon: XCircle,
-        color: 'rose',
-        filterValue: 'Inactive',
-        subtext: 'Hidden or unapproved',
-      },
-    ];
-  }, [items, totalCount]);
 
   return (
     <div className="flex min-h-screen bg-[#F8F6F0] text-[#1A1817]">
@@ -214,7 +164,7 @@ export default function TestimonialPage() {
         <Header title="Testimonials Management" />
 
         <main className="flex-1 p-5 md:p-6 max-w-7xl w-full">
-          
+
           {/* Header Bar */}
           <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
@@ -246,53 +196,21 @@ export default function TestimonialPage() {
             </div>
           </div>
 
-          {/* Search & Filter Toolbar */}
+          {/* Search Toolbar */}
           <div className="bg-white px-3.5 py-2.5 rounded-xl border border-[#E8E3DA] shadow-2xs mb-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full sm:w-72">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full sm:w-80">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#9C9488] pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by client name, category..."
-                className="w-full pl-8 pr-3 py-1.5 text-[11px] rounded-lg border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition-all shadow-2xs placeholder-[#9C9488]"
+                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition-all shadow-2xs placeholder-[#9C9488]"
               />
             </form>
-
-            <div className="flex items-center gap-2.5 self-end sm:self-auto">
-              {/* View Mode Toggle */}
-              <div className="inline-flex rounded-lg border border-[#E2DDD5] bg-[#FAF8F5] p-0.5 shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('grid')}
-                  title="Grid View"
-                  className={`p-1 rounded-md transition cursor-pointer ${
-                    viewMode === 'grid'
-                      ? 'bg-[#1A1817] text-[#FAF8F5] shadow-xs'
-                      : 'text-[#5C554B] hover:text-[#1A1817]'
-                  }`}
-                >
-                  <LayoutGrid className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('table')}
-                  title="Table View"
-                  className={`p-1 rounded-md transition cursor-pointer ${
-                    viewMode === 'table'
-                      ? 'bg-[#1A1817] text-[#FAF8F5] shadow-xs'
-                      : 'text-[#5C554B] hover:text-[#1A1817]'
-                  }`}
-                >
-                  <List className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-
           </div>
 
-          {/* Main Content Area */}
+          {/* Main Content Area - Table Only */}
           {loading ? (
             <div className="bg-white rounded-2xl border border-[#E8E3DA] p-12 text-center shadow-2xs">
               <RefreshCw className="h-7 w-7 animate-spin text-[#9E7432] mx-auto mb-3" />
@@ -317,133 +235,6 @@ export default function TestimonialPage() {
                 <span>Add First Review</span>
               </button>
             </div>
-          ) : viewMode === 'grid' ? (
-            /* ── GRID VIEW ── */
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {displayedItems.map((item, index) => {
-                  const id = item.id;
-                  const clientName = item.testimonial_client_name || item.client_name || item.name || 'Anonymous Client';
-                  const category = item.testimonial_for || item.category || 'General';
-                  const rating = Number(item.testimonial_rating || item.rating || 5);
-                  const description = item.testimonial_description || item.description || item.comment || '';
-                  const status = item.testimonial_status || item.status || 'Active';
-                  const isActive = status === 'Active';
-                  const date = item.created_at || item.createdDate || item.date;
-                  const rowNumber = (currentPage - 1) * perPage + index + 1;
-
-                  return (
-                    <div
-                      key={id || index}
-                      className="bg-white rounded-2xl border border-[#E8E3DA] p-5 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-                    >
-                      <div className="space-y-3">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1A1817] text-[#FAF8F5] text-xs font-bold shadow-xs">
-                              {clientName[0]?.toUpperCase() || 'C'}
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-bold text-[#1A1817] leading-tight">
-                                {clientName}
-                              </h4>
-                              <span className="inline-flex items-center gap-1 text-[10px] text-[#8C8275] mt-0.5">
-                                <Tag className="h-2.5 w-2.5 text-[#9E7432]" />
-                                <span>{category}</span>
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Quick Status Toggle */}
-                          <button
-                            type="button"
-                            onClick={() => handleToggleStatus(item)}
-                            title="Click to toggle status"
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold transition cursor-pointer flex-shrink-0 ${
-                              isActive
-                                ? 'bg-[#EBF7EE] text-[#1E7E34] border border-[#C3E6CB]'
-                                : 'bg-[#FBEAEA] text-[#9A2D2D] border border-[#F5C6CB]'
-                            }`}
-                          >
-                            <span
-                              className={`h-1.5 w-1.5 rounded-full ${isActive ? 'bg-[#1E7E34]' : 'bg-[#9A2D2D]'}`}
-                            />
-                            {status}
-                          </button>
-                        </div>
-
-                        {/* Rating Stars Banner */}
-                        <div className="flex items-center justify-between bg-[#FAF8F5] px-2.5 py-1.5 rounded-lg border border-[#E8E3DA]">
-                          <div className="flex items-center gap-0.5">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${
-                                  star <= rating
-                                    ? 'fill-[#D4A038] text-[#D4A038]'
-                                    : 'text-[#DDD7CD] fill-transparent'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="font-mono text-[11px] font-bold text-[#9E7432]">
-                            {rating}.0 / 5.0
-                          </span>
-                        </div>
-
-                        {/* Review Quote Text */}
-                        <div className="relative">
-                          <p className="text-xs text-[#4A443D] leading-relaxed line-clamp-3 italic">
-                            "{description}"
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Card Footer */}
-                      <div className="mt-4 pt-3 border-t border-[#F0ECE3] flex items-center justify-between text-[11px] text-[#8C8275]">
-                        <span className="font-mono text-[10px] font-semibold text-[#8C6527] bg-[#FBF4E8] px-2 py-0.5 rounded-md border border-[#F2E4C9]" title={`Sl.No ${rowNumber}`}>
-                          {rowNumber}
-                        </span>
-
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenPreview(item)}
-                            className="p-1.5 rounded-lg hover:bg-[#FAF8F5] text-[#5C554B] hover:text-[#1A1817] transition cursor-pointer"
-                            title="Read Full Review"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/testimonial/edit/${item.id}`)}
-                            className="p-1.5 rounded-lg hover:bg-[#FAF8F5] text-[#5C554B] hover:text-[#9E7432] transition cursor-pointer"
-                            title="Edit Testimonial"
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Pagination */}
-              <div className="bg-white rounded-xl border border-[#E8E3DA] overflow-hidden shadow-2xs">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalCount={totalCount}
-                  perPage={perPage}
-                  onPageChange={handlePageChange}
-                  from={from}
-                  to={to}
-                />
-              </div>
-            </div>
           ) : (
             /* ── TABLE VIEW ── */
             <div className="bg-white rounded-2xl border border-[#E8E3DA] overflow-hidden shadow-2xs">
@@ -451,13 +242,12 @@ export default function TestimonialPage() {
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-[#E8E3DA] bg-[#FAF8F5] font-semibold text-[#5C554B] whitespace-nowrap">
-                      <th className="px-4 py-3 w-12">sl.no</th>
-                      <th className="px-4 py-3">for</th>
+                      <th className="px-4 py-3 w-16">Sl.No</th>
+                      <th className="px-4 py-3">Page_for</th>
                       <th className="px-4 py-3">client_name</th>
                       <th className="px-4 py-3 max-w-xs">description</th>
                       <th className="px-4 py-3">created</th>
                       <th className="px-4 py-3">rating</th>
-                      <th className="px-4 py-3">updated</th>
                       <th className="px-4 py-3">status</th>
                       <th className="px-4 py-3 text-right">Actions</th>
                     </tr>
@@ -468,8 +258,15 @@ export default function TestimonialPage() {
                       const category = item.testimonial_for || item.category || 'home';
                       const clientName = item.testimonial_client_name || item.client_name || item.name || 'Anonymous';
                       const description = item.testimonial_description || item.description || item.comment || '';
-                      const createdDate = item.testimonial_created_date || item.created_at || item.created_date;
-                      const updatedDate = item.testimonial_updated_date || item.updated_at || item.updated_date;
+                      const createdDate =
+                        item.testimonial_created_date ||
+                        item.testimonial_create_date ||
+                        item.testimonial_created_at ||
+                        item.created_at ||
+                        item.createdAt ||
+                        item.created_date ||
+                        item.createdDate ||
+                        item.date;
                       const rating = Number(item.testimonial_rating || item.rating || 5);
                       const status = item.testimonial_status || item.status || 'Active';
                       const isActive = status === 'Active';
@@ -479,7 +276,7 @@ export default function TestimonialPage() {
                         <tr key={id || index} className="hover:bg-[#FAF8F5] transition-colors">
                           {/* 1. sl.no */}
                           <td className="px-4 py-3 font-mono text-xs text-[#9C9488]">{rowNumber}</td>
-                          
+
                           {/* 2. for */}
                           <td className="px-4 py-3 text-[#5C554B] whitespace-nowrap">
                             <span className="px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#E2DDD5] text-[11px] font-medium">
@@ -499,7 +296,7 @@ export default function TestimonialPage() {
 
                           {/* 4. description */}
                           <td className="px-4 py-3 text-[#78716C] max-w-xs truncate italic" title={description}>
-                            "{description}"
+                            {description}
                           </td>
 
                           {/* 5. created */}
@@ -515,22 +312,16 @@ export default function TestimonialPage() {
                             </div>
                           </td>
 
-                          {/* 7. updated */}
-                          <td className="px-4 py-3 whitespace-nowrap text-xs text-[#78716C]">
-                            {formatDate(updatedDate)}
-                          </td>
-
-                          {/* 8. status */}
+                          {/* 7. status */}
                           <td className="px-4 py-3 whitespace-nowrap">
                             <button
                               type="button"
                               onClick={() => handleToggleStatus(item)}
                               title="Click to toggle status"
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer ${
-                                isActive
-                                   ? 'bg-[#EBF7EE] text-[#1E7E34] border border-[#C3E6CB] hover:bg-[#D4EDDA]'
-                                  : 'bg-[#FBEAEA] text-[#9A2D2D] border border-[#F5C6CB] hover:bg-[#F8D7DA]'
-                              }`}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer ${isActive
+                                ? 'bg-[#EBF7EE] text-[#1E7E34] border border-[#C3E6CB] hover:bg-[#D4EDDA]'
+                                : 'bg-[#FBEAEA] text-[#9A2D2D] border border-[#F5C6CB] hover:bg-[#F8D7DA]'
+                                }`}
                             >
                               <span
                                 className={`h-1.5 w-1.5 rounded-full ${isActive ? 'bg-[#1E7E34]' : 'bg-[#9A2D2D]'}`}
@@ -542,14 +333,14 @@ export default function TestimonialPage() {
                           {/* 9. Actions */}
                           <td className="px-4 py-3 text-right whitespace-nowrap">
                             <div className="inline-flex items-center gap-1.5">
-                              <button
+                              {/* <button
                                 type="button"
                                 onClick={() => handleOpenPreview(item)}
                                 title="Read Review"
                                 className="p-1.5 rounded-lg border border-[#DDD7CD] bg-white hover:bg-[#EFECE6] text-[#4A443D] transition shadow-2xs cursor-pointer"
                               >
                                 <Eye className="h-3.5 w-3.5" />
-                              </button>
+                              </button> */}
 
                               <button
                                 type="button"
