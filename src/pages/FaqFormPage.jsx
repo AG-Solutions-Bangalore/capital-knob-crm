@@ -66,14 +66,14 @@ export default function FaqFormPage() {
       const rawList = Array.isArray(res?.data?.data)
         ? res.data.data
         : Array.isArray(res?.data)
-        ? res.data
-        : Array.isArray(res?.pages)
-        ? res.pages
-        : Array.isArray(res?.page_two)
-        ? res.page_two
-        : Array.isArray(res)
-        ? res
-        : [];
+          ? res.data
+          : Array.isArray(res?.pages)
+            ? res.pages
+            : Array.isArray(res?.page_two)
+              ? res.page_two
+              : Array.isArray(res)
+                ? res
+                : [];
 
       const formatted = rawList
         .map((p) => {
@@ -102,14 +102,14 @@ export default function FaqFormPage() {
 
       const formattedSubs = Array.isArray(rawSubs) && rawSubs.length > 0
         ? rawSubs.map((s, idx) => ({
-            id: s.id,
-            faq_sort: String(s.faq_sort ?? idx + 1),
-            faq_for: s.faq_for || parentFaqFor,
-            faq_heading: s.faq_heading || '',
-            faq_que: s.faq_que || '',
-            faq_ans: s.faq_ans || '',
-            faq_status: (s.faq_status === 0 || s.faq_status === '0' || String(s.faq_status).toLowerCase() === 'inactive') ? 'Inactive' : 'Active',
-          }))
+          id: s.id,
+          faq_sort: String(s.faq_sort ?? idx + 1),
+          faq_for: s.faq_for || parentFaqFor,
+          faq_heading: s.faq_heading || '',
+          faq_que: s.faq_que || '',
+          faq_ans: s.faq_ans || '',
+          faq_status: (s.faq_status === 0 || s.faq_status === '0' || String(s.faq_status).toLowerCase() === 'inactive') ? 'Inactive' : 'Active',
+        }))
         : [emptySubItem(1, parentFaqFor)];
 
       setForm({
@@ -295,7 +295,7 @@ export default function FaqFormPage() {
         <Header title={isEditing ? 'Edit FAQ Topic' : 'New FAQ Topic'} />
 
         <main className="flex-1 p-5 md:p-8 max-w-5xl w-full mx-auto space-y-6">
-          
+
           {/* Breadcrumb & Navigation Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-2">
@@ -362,11 +362,10 @@ export default function FaqFormPage() {
               {/* Status Preview */}
               {isEditing && (
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
-                    form.faq_status === 'Active'
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${form.faq_status === 'Active'
                       ? 'bg-[#EDF7EE] text-[#1E6B34] border-[#C6E6CC]'
                       : 'bg-[#FDF0F0] text-[#9A2D2D] border-[#F6C8C8]'
-                  }`}>
+                    }`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${form.faq_status === 'Active' ? 'bg-[#1E6B34]' : 'bg-[#9A2D2D]'}`} />
                     <span>{form.faq_status === 'Active' ? 'Active (Visible)' : 'Inactive (Hidden)'}</span>
                   </span>
@@ -377,7 +376,7 @@ export default function FaqFormPage() {
 
           {/* Form Body */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
             {errorMsg && (
               <div className="flex items-center gap-2 p-3.5 rounded-xl bg-[#FDF0F0] border border-[#F6C8C8] text-[#9A2D2D] text-xs shadow-2xs">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
