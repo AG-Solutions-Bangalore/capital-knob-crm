@@ -28,6 +28,7 @@ import {
   updateBlogStatus,
 } from '../services/blogApi';
 import { getActiveCategories } from '../services/categoryApi';
+import { getAssetBaseURL } from '../services/api';
 import { useAuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -45,7 +46,7 @@ function formatDate(dateStr) {
   }
 }
 
-function resolveImageUrl(url, baseUrl = 'https://agsdemo.in/ckapi/public/assets/images/blog_images/') {
+function resolveImageUrl(url, baseUrl = getAssetBaseURL('/assets/images/blog_images/')) {
   if (!url) return null;
   if (url.startsWith('blob:') || url.startsWith('data:')) {
     return url;
@@ -70,7 +71,7 @@ export default function BlogViewPage() {
   const [loading, setLoading] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [togglingStatus, setTogglingStatus] = useState(false);
-  const [imageBaseUrl, setImageBaseUrl] = useState('https://agsdemo.in/ckapi/public/assets/images/blog_images/');
+  const [imageBaseUrl, setImageBaseUrl] = useState(() => getAssetBaseURL('/assets/images/blog_images/'));
 
   const fetchBlogDetails = async () => {
     setLoading(true);

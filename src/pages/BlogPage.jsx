@@ -9,6 +9,8 @@ import {
   updateBlogStatus 
 } from '../services/blogApi';
 import { getCategories } from '../services/categoryApi';
+import { getAssetBaseURL } from '../services/api';
+import { useApp } from '../context/AppContext';
 import { 
   Plus, 
   Search, 
@@ -52,7 +54,20 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [imageBaseUrl, setImageBaseUrl] = useState('https://agsdemo.in/ckapi/public/assets/images/blog_images/');
+  const [apiBlogBaseUrl, setImageBaseUrl] = useState(null);
+  const { imageUrlConfig } = useApp();
+  const imageBaseUrl = useMemo(() => {
+    if (apiBlogBaseUrl) return apiBlogBaseUrl;
+    const found = (imageUrlConfig || []).find(
+      (i) =>
+        i?.image_for?.toLowerCase() === 'blog' ||
+        i?.image_for?.toLowerCase() === 'blogs' ||
+        i?.image_for?.toLowerCase() === 'blog_image' ||
+        i?.image_for?.toLowerCase() === 'blog_images'
+    );
+    const fallbackBase = getAssetBaseURL('/assets/images/blog_images/');
+    return found?.image_url || fallbackBase;
+  }, [apiBlogBaseUrl, imageUrlConfig]);
 
   const debouncedSearch = useDebounce(searchQuery, 350);
 

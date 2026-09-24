@@ -12,6 +12,7 @@ import {
   updateClient,
   updateClientStatus,
 } from '../services/clientApi';
+import { getAssetBaseURL } from '../services/api';
 import {
   Plus,
   Search,
@@ -75,7 +76,8 @@ export default function ClientPage() {
         i?.image_for?.toLowerCase() === 'client_image' ||
         i?.image_for?.toLowerCase() === 'client_images'
     );
-    return found?.image_url || 'https://agsdemo.in/ckapi/public/assets/images/client_images/';
+    const fallbackBase = getAssetBaseURL('/assets/images/client_images/');
+    return found?.image_url || fallbackBase;
   }, [imageUrlConfig]);
 
   const resolveImageUrl = (imageVal) => {

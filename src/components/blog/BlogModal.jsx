@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, Sparkles, Upload, FileText, ChevronRight, ChevronLeft } from 'lucide-react';
 import { getActiveCategories } from '../../services/categoryApi';
+import { getAssetBaseURL } from '../../services/api';
 import RichTextEditor from '../common/RichTextEditor';
 import toast from 'react-hot-toast';
 
@@ -13,7 +14,7 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
-function resolveImageUrl(url, baseUrl = 'https://agsdemo.in/ckapi/public/assets/images/blog_images/') {
+function resolveImageUrl(url, baseUrl = getAssetBaseURL('/assets/images/blog_images/')) {
   if (!url) return null;
   if (url.startsWith('blob:') || url.startsWith('data:')) {
     return url;
@@ -36,7 +37,7 @@ export default function BlogModal({
   setForm,
   editingId,
   submitting,
-  imageBaseUrl = 'https://agsdemo.in/ckapi/public/assets/images/blog_images/',
+  imageBaseUrl = getAssetBaseURL('/assets/images/blog_images/'),
 }) {
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState('general');
@@ -149,6 +150,14 @@ export default function BlogModal({
       setTimeout(() => {
         slugInputRef.current?.focus();
       }, 100);
+      return false;
+    }
+
+    const cleanDesc = (form.blog_description || '').replace(/<[^>]*>/g, '').trim();
+    if (!cleanDesc) {
+      setErrors((prev) => ({ ...prev, blog_description: true }));
+      setActiveTab('general');
+      toast.error('Full Article Body / Description is required.');
       return false;
     }
 
