@@ -25,6 +25,7 @@ import {
   getBlogById,
 } from '../services/blogApi';
 import { getActiveCategories } from '../services/categoryApi';
+import { getAssetBaseURL } from '../services/api';
 import RichTextEditor from '../components/common/RichTextEditor';
 import toast from 'react-hot-toast';
 
@@ -37,7 +38,7 @@ function slugify(text) {
     .replace(/^-+|-+$/g, '');
 }
 
-function resolveImageUrl(url, baseUrl = 'https://agsdemo.in/ckapi/public/assets/images/blog_images/') {
+function resolveImageUrl(url, baseUrl = getAssetBaseURL('/assets/images/blog_images/')) {
   if (!url) return null;
   if (url.startsWith('blob:') || url.startsWith('data:')) {
     return url;
@@ -64,7 +65,7 @@ export default function BlogFormPage() {
   const [fetchingData, setFetchingData] = useState(false);
   const [errors, setErrors] = useState({});
   const [manualSlug, setManualSlug] = useState(false);
-  const [imageBaseUrl, setImageBaseUrl] = useState('https://agsdemo.in/ckapi/public/assets/images/blog_images/');
+  const [imageBaseUrl, setImageBaseUrl] = useState(() => getAssetBaseURL('/assets/images/blog_images/'));
 
   const [form, setForm] = useState({
     blog_title: '',
@@ -214,11 +215,16 @@ export default function BlogFormPage() {
     if (!form.blog_slug.trim()) {
       newErrors.blog_slug = 'URL Slug is required.';
     }
+    const cleanDesc = (form.blog_description || '').replace(/<[^>]*>/g, '').trim();
+    if (!cleanDesc) {
+      newErrors.blog_description = 'Full Article Body / Description is required.';
+    }
     setErrors(newErrors);
 
-    if (newErrors.blog_title || newErrors.blog_slug) {
+    if (newErrors.blog_title || newErrors.blog_slug || newErrors.blog_description) {
       setActiveTab('general');
-      toast.error('Please fill in required fields.');
+      const firstMsg = newErrors.blog_title || newErrors.blog_slug || newErrors.blog_description;
+      toast.error(firstMsg);
       return false;
     }
     return true;
@@ -511,16 +517,22 @@ export default function BlogFormPage() {
                 {/* Rich text editor body */}
                 <div>
                   <label className="block text-xs font-semibold text-[#3D372E] mb-1.5">
-                    Full Article Body
+                    Full Article Body <span className="text-[#9A2D2D]">*</span>
                   </label>
                   <RichTextEditor
                     value={form.blog_description}
                     onChange={(htmlContent) => {
                       setForm((prev) => ({ ...prev, blog_description: htmlContent }));
+                      if (errors.blog_description) {
+                        setErrors((prev) => ({ ...prev, blog_description: false }));
+                      }
                     }}
                     placeholder="Write and format the full content of your article here..."
                     minHeight="350px"
                   />
+                  {errors.blog_description && (
+                    <p className="text-[11px] text-[#E05252] mt-1 font-medium">{errors.blog_description}</p>
+                  )}
                 </div>
 
                 <div className="flex justify-end pt-3">

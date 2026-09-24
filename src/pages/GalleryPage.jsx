@@ -12,6 +12,7 @@ import {
   updateGallery,
   updateGalleryStatus,
 } from '../services/galleryApi';
+import { getAssetBaseURL } from '../services/api';
 import {
   Plus,
   Search,
@@ -84,7 +85,8 @@ export default function GalleryPage() {
         i?.image_for?.toLowerCase() === 'gallery_image' ||
         i?.image_for?.toLowerCase() === 'gallery_images'
     );
-    return found?.image_url || 'https://agsdemo.in/ckapi/public/assets/images/gallerys_images/';
+    const fallbackBase = getAssetBaseURL('/assets/images/gallerys_images/');
+    return found?.image_url || fallbackBase;
   }, [apiGalleryBaseUrl, imageUrlConfig]);
 
   // Resolve full image URL helper
