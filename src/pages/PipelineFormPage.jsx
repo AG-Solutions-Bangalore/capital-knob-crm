@@ -304,8 +304,8 @@ export default function PipelineFormPage() {
                       onChange={(e) => setForm((prev) => ({ ...prev, pipeline_status: e.target.value }))}
                       className="w-full px-4 py-2.5 text-xs sm:text-sm rounded-xl border border-[#E2DDD5] bg-[#FAF8F5] text-[#1A1817] focus:outline-none focus:border-[#C99C4B] focus:bg-white transition shadow-2xs cursor-pointer"
                     >
-                      <option value="Active">Active (Running)</option>
-                      <option value="Inactive">Inactive (Paused)</option>
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
                     </select>
                   </div>
                 )}

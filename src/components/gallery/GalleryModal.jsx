@@ -250,7 +250,7 @@ export default function GalleryModal({
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-semibold text-[#3D372E]">
-                    Replace Photo (Optional)
+                    Replace Photo
                   </label>
                   {selectedPreviews.length > 0 && (
                     <button
@@ -258,7 +258,7 @@ export default function GalleryModal({
                       onClick={handleClearAll}
                       className="text-xs text-[#9A2D2D] hover:underline cursor-pointer font-medium"
                     >
-                      Cancel Replacement (Keep Original)
+                      Cancel Replacement • Keep Original
                     </button>
                   )}
                 </div>

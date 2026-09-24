@@ -20,7 +20,8 @@ import {
   MailCheck,
   Send,
   LogOut,
-  PanelLeft
+  PanelLeft,
+  Download,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -46,22 +47,28 @@ const marketingNavItems = [
   { label: 'WhatsApp Campaign', to: '/whatsapp-campaign', icon: Send, requires: 'whatsapp' },
 ];
 
+const reportsNavItems = [
+  { label: 'Downloads', to: '/downloads', icon: Download },
+];
+
 export const Sidebar = () => {
   const navigate = useNavigate();
   const { companyInfo, companyLogoUrl, isSidebarCollapsed, toggleSidebar } = useAppContext();
-  const { user, logout, hasEmail, hasWhatsApp } = useAuthContext();
+  const { user, logout, hasEmail, hasWhatsApp, isAdmin } = useAuthContext();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Filter marketing items according to user channel permissions
+  // Filter marketing items according to user role and channel permissions
+  // If user_type === 1 (standard user), marketing is completely hidden
   const visibleMarketingItems = useMemo(() => {
+    if (!isAdmin) return [];
     return marketingNavItems.filter((item) => {
       if (item.requires === 'email') return hasEmail;
       if (item.requires === 'whatsapp') return hasWhatsApp;
       if (item.requires === 'any') return hasEmail || hasWhatsApp;
       return true;
     });
-  }, [hasEmail, hasWhatsApp]);
+  }, [isAdmin, hasEmail, hasWhatsApp]);
 
   const handleConfirmLogout = async () => {
     setLoggingOut(true);
@@ -209,6 +216,20 @@ export const Sidebar = () => {
                 </div>
               </div>
             )}
+
+            {/* 4. REPORTS Section */}
+            <div className="pt-2">
+              {!isSidebarCollapsed ? (
+                <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#9C9488]">
+                  Reports
+                </div>
+              ) : (
+                <div className="my-1.5 border-t border-[#E8E3DA]" />
+              )}
+              <div className="space-y-0.5">
+                {reportsNavItems.map(renderNavLink)}
+              </div>
+            </div>
 
           </nav>
         </div>

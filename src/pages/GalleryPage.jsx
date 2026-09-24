@@ -93,16 +93,17 @@ export default function GalleryPage() {
     const rawVal = typeof imageVal === 'string' ? imageVal : (targetObj?.gallery_image || targetObj?.image || targetObj?.file_name || targetObj?.photo || targetObj?.gallery_photo);
     
     if (!rawVal) return noImageUrl || '';
+    const cacheBuster = targetObj?.updated_at ? new Date(targetObj.updated_at).getTime() : (targetObj?.id || '');
     if (rawVal.startsWith('http://') || rawVal.startsWith('https://') || rawVal.startsWith('data:') || rawVal.startsWith('blob:')) {
       const sep = rawVal.includes('?') ? '&' : '?';
-      return `${rawVal}${sep}t=${targetObj?.updated_at ? new Date(targetObj.updated_at).getTime() : Date.now()}`;
+      return cacheBuster ? `${rawVal}${sep}t=${cacheBuster}` : rawVal;
     }
 
     const baseUrl = targetObj?.gallery_url || targetObj?.image_url || galleryBaseUrl;
     const cleanBase = String(baseUrl).replace(/\/$/, '');
     const cleanPath = String(rawVal).replace(/^\//, '');
     const sep = cleanPath.includes('?') ? '&' : '?';
-    return `${cleanBase}/${cleanPath}${sep}t=${targetObj?.updated_at ? new Date(targetObj.updated_at).getTime() : Date.now()}`;
+    return cacheBuster ? `${cleanBase}/${cleanPath}${sep}t=${cacheBuster}` : `${cleanBase}/${cleanPath}`;
   };
 
   const [copiedId, setCopiedId] = useState(null);
